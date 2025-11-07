@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__ide__executeCode",
+      "Bash(python -c \"import random; nums = random.sample(range(0, 101), 3); print(f''生成的三个随机数字为：{nums}\\n''); print(f''第一个数字：{nums[0]}''); print(f''第二个数字：{nums[1]}''); print(f''第三个数字：{nums[2]}'')\")",
+      "Bash(go mod init github.com/ossinsight-analyze/trending-notifier)",
+      "Bash(where go)",
+      "Bash(mkdir -p cmd/notifier pkg/api pkg/email pkg/formatter internal/config configs)",
+      "Bash(tree -a -I .git)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

@@ -1,0 +1,44 @@
+# Git
+.git
+.gitignore
+
+# IDE
+.idea
+.vscode
+*.swp
+*.swo
+
+# Build artifacts
+bin/
+dist/
+build/
+*.exe
+
+# Test and coverage
+*.test
+coverage.out
+coverage.html
+
+# Documentation
+*.md
+!README.md
+
+# Config files (these should be provided at runtime)
+configs/*.yaml
+configs/*.yml
+!configs/config.example.yaml
+
+# Environment
+.env
+.env.local
+
+# Logs
+*.log
+logs/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Makefile
+Makefile

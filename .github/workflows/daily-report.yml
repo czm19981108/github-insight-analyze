@@ -1,0 +1,103 @@
+name: Daily Trending Report
+
+on:
+  # 每天 07:30 上海时间（23:30 UTC前一天）
+  schedule:
+    - cron: '30 23 * * *'
+
+  # 支持手动触发
+  workflow_dispatch:
+    inputs:
+      language:
+        description: 'Programming language (e.g., go, java, python, all)'
+        required: false
+        default: 'go'
+      period:
+        description: 'Time period (daily, weekly, monthly)'
+        required: false
+        default: 'daily'
+
+jobs:
+  send-report:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.21'
+          cache: true
+
+      - name: Download dependencies
+        run: go mod download
+
+      - name: Build application
+        run: go build -o notifier ./cmd/notifier
+
+      - name: Run notifier
+        env:
+          # SMTP配置（需在GitHub仓库Settings -> Secrets中配置）
+          SMTP_HOST: ${{ secrets.SMTP_HOST }}
+          SMTP_PORT: ${{ secrets.SMTP_PORT }}
+          SMTP_USERNAME: ${{ secrets.SMTP_USERNAME }}
+          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+          EMAIL_FROM: ${{ secrets.EMAIL_FROM }}
+          EMAIL_TO: ${{ secrets.EMAIL_TO }}
+          EMAIL_SUBJECT: "GitHub Trending Repositories Report - ${{ github.event.inputs.language || 'go' }}"
+          EMAIL_USE_HTML: "true"
+
+          # API配置
+          API_BASE_URL: "https://api.ossinsight.io"
+          API_TIMEOUT: "30"
+
+          # 查询配置
+          QUERY_LANGUAGE: ${{ github.event.inputs.language || 'go' }}
+          QUERY_PERIOD: ${{ github.event.inputs.period || 'daily' }}
+          QUERY_LIMIT: "100"
+        run: |
+          ./notifier
+          echo "Report sent successfully at $(date)"
+
+      - name: Notify on failure
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const issue_title = `Workflow Failed: ${context.workflow} - ${new Date().toISOString().split('T')[0]}`;
+            const issue_body = `## Workflow Failure Report
+
+            **Workflow**: ${context.workflow}
+            **Run ID**: ${context.runId}
+            **Run Number**: ${context.runNumber}
+            **Trigger**: ${context.eventName}
+            **Ref**: ${context.ref}
+            **SHA**: ${context.sha}
+            **Time**: ${new Date().toISOString()}
+
+            **Error**: The daily trending report workflow failed. Please check the logs for details.
+
+            [View Run](${context.payload.repository.html_url}/actions/runs/${context.runId})
+            `;
+
+            // 检查是否已存在相同的issue
+            const issues = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: 'workflow-failure'
+            });
+
+            const existingIssue = issues.data.find(issue => issue.title === issue_title);
+
+            if (!existingIssue) {
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: issue_title,
+                body: issue_body,
+                labels: ['workflow-failure', 'automated']
+              });
+            }

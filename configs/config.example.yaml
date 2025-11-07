@@ -1,0 +1,20 @@
+api:
+  base_url: "https://api.ossinsight.io"
+  timeout: 30
+
+email:
+  smtp_host: "smtp.gmail.com"
+  smtp_port: 587
+  username: "your-email@gmail.com"
+  password: "your-app-password"
+  from: "your-email@gmail.com"
+  to:
+    - "recipient1@example.com"
+    - "recipient2@example.com"
+  subject: "GitHub Trending Repositories Report"
+  use_html: true
+
+query:
+  language: "go"  # 可选: "go", "java", "python", "javascript", "all" 等
+  period: "daily"  # 可选: "daily", "weekly", "monthly"
+  limit: 100
