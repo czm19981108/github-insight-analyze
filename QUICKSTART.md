@@ -123,15 +123,65 @@ git push -u origin main
 
 ### 2. 添加密钥
 
-访问：**仓库 → Settings → Secrets and variables → Actions**
+在 GitHub 仓库中配置 Actions 所需的环境变量（Secrets）：
 
-添加以下密钥：
-- `SMTP_HOST`: smtp.gmail.com
-- `SMTP_PORT`: 587
-- `SMTP_USERNAME`: your-email@gmail.com
-- `SMTP_PASSWORD`: your-app-password
-- `EMAIL_FROM`: your-email@gmail.com
-- `EMAIL_TO`: recipient@example.com
+**详细步骤**：
+
+1. **打开仓库页面**
+   - 在浏览器中访问你的 GitHub 仓库：`https://github.com/yourusername/github-insight-analyze`
+
+2. **进入设置页面**
+   - 点击仓库顶部的 **Settings** 标签（⚙️ 齿轮图标旁边）
+   - 如果看不到 Settings，说明你没有仓库的管理权限
+
+3. **找到 Secrets 配置**
+   - 在左侧边栏中找到 **Security** 部分
+   - 点击 **Secrets and variables** 展开
+   - 点击 **Actions**
+   - 你会看到 "Actions secrets and variables" 页面
+
+4. **添加每个密钥**
+
+   对于以下每个密钥，重复此过程：
+
+   a. 点击右上角的 **New repository secret** 按钮（绿色按钮）
+
+   b. 在 **Name** 字段中输入密钥名称（如 `SMTP_HOST`）
+
+   c. 在 **Secret** 字段中输入对应的值
+
+   d. 点击 **Add secret** 保存
+
+**需要添加的密钥列表**：
+
+| 密钥名称 | 值示例 | 说明 |
+|---------|--------|------|
+| `SMTP_HOST` | `smtp.gmail.com` | SMTP 服务器地址 |
+| `SMTP_PORT` | `587` | SMTP 端口号（通常是 587） |
+| `SMTP_USERNAME` | `your-email@gmail.com` | 你的邮箱地址 |
+| `SMTP_PASSWORD` | `abcd efgh ijkl mnop` | Gmail 应用专用密码（见下方说明） |
+| `EMAIL_FROM` | `your-email@gmail.com` | 发件人邮箱（通常与 SMTP_USERNAME 相同） |
+| `EMAIL_TO` | `recipient@example.com` | 收件人邮箱地址 |
+
+**📌 重要提示**：
+
+- **Gmail 用户必须使用应用专用密码**，而不是你的 Gmail 登录密码！
+
+  如何获取 Gmail 应用专用密码：
+  1. 访问 [Google 账户安全设置](https://myaccount.google.com/security)
+  2. 确保已启用"两步验证"
+  3. 访问 [应用专用密码](https://myaccount.google.com/apppasswords)
+  4. 选择"应用"下拉菜单 → 选择"邮件"
+  5. 选择"设备"下拉菜单 → 选择"其他（自定义名称）"
+  6. 输入名称（如"GitHub Actions"）
+  7. 点击"生成"
+  8. 复制生成的 16 位密码（格式：`xxxx xxxx xxxx xxxx`）
+  9. 将这个密码作为 `SMTP_PASSWORD` 的值
+
+- **配置完成后的效果**：
+  - 你应该能在 "Actions secrets" 列表中看到 6 个密钥
+  - 密钥的值是隐藏的，只显示密钥名称
+  - 如果需要修改，点击密钥名称右侧的 "Update" 按钮
 
 ### 3. 启用 Actions
 
