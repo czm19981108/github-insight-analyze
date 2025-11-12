@@ -1,5 +1,5 @@
 api:
-  base_url: "https://api.github.com"
+  base_url: "https://api.ossinsight.io"
   timeout: 30
 
 email:

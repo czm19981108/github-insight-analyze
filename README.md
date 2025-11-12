@@ -82,7 +82,7 @@ cp configs/config.example.yaml configs/config.yaml
 2. Edit `configs/config.yaml`:
 ```yaml
 api:
-  base_url: "https://api.github.com"
+  base_url: "https://api.ossinsight.io"
   timeout: 30
 
 email:
@@ -118,7 +118,7 @@ export EMAIL_SUBJECT="GitHub Trending Report"
 export EMAIL_USE_HTML="true"
 
 # API Configuration
-export API_BASE_URL="https://api.github.com"
+export API_BASE_URL="https://api.ossinsight.io"
 export API_TIMEOUT="30"
 
 # Query Configuration
@@ -202,7 +202,7 @@ The workflow is already configured in `.github/workflows/daily-report.yml`
 
 This project uses the GitHub Search API to fetch trending repositories.
 
-**Endpoint**: `https://api.github.com/search/repositories`
+**Endpoint**: `https://api.ossinsight.io/search/repositories`
 
 **Query Parameters**:
 - `q`: Search query (e.g., `stars:>50 pushed:>2025-01-11 language:go`)

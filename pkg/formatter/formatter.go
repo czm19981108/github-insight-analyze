@@ -62,12 +62,16 @@ func (f *TextFormatter) Format(repos []api.Repository, language string, period s
 		if repo.ForksDelta > 0 {
 			sb.WriteString(fmt.Sprintf(" (+%d)", repo.ForksDelta))
 		}
-		sb.WriteString("\n\n")
+		sb.WriteString("\n")
+
+		sb.WriteString(fmt.Sprintf("    Pushes: %d\n", repo.Pushes))
+		sb.WriteString(fmt.Sprintf("    Pull Requests: %d\n", repo.PullRequests))
+		sb.WriteString("\n")
 	}
 
 	// 页脚
 	sb.WriteString("--------------------------------------\n")
-	sb.WriteString("Powered by GitHub API\n")
+	sb.WriteString("Powered by OSS Insight API\n")
 
 	return sb.String(), nil
 }
@@ -229,6 +233,8 @@ func (f *HTMLFormatter) Format(repos []api.Repository, language string, period s
                     <th>Language</th>
                     <th>Stars</th>
                     <th>Forks</th>
+                    <th>Pushes</th>
+                    <th>PRs</th>
                 </tr>
             </thead>
             <tbody>
@@ -272,6 +278,12 @@ func (f *HTMLFormatter) Format(repos []api.Repository, language string, period s
 		}
 		sb.WriteString("</td>\n")
 
+		// Pushes
+		sb.WriteString(fmt.Sprintf("                    <td>%s</td>\n", formatNumber(repo.Pushes)))
+
+		// Pull Requests
+		sb.WriteString(fmt.Sprintf("                    <td>%s</td>\n", formatNumber(repo.PullRequests)))
+
 		sb.WriteString("                </tr>\n")
 	}
 
@@ -280,7 +292,7 @@ func (f *HTMLFormatter) Format(repos []api.Repository, language string, period s
         </table>
 
         <div class="footer">
-            <p>Powered by <a href="https://api.github.com" target="_blank">GitHub API</a></p>
+            <p>Powered by <a href="https://api.ossinsight.io" target="_blank">OSS Insight API</a></p>
         </div>
     </div>
 </body>

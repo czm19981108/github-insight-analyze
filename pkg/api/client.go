@@ -7,6 +7,8 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"strconv"
+	"strings"
 	"time"
 )
 
@@ -31,6 +33,8 @@ type Repository struct {
 	StarsDelta      int    `json:"stars_delta"`
 	ForksDelta      int    `json:"forks_delta"`
 	StargazersDelta int    `json:"stargazers_delta"`
+	Pushes          int    `json:"pushes"`         // 最近时间段内的 push 数量
+	PullRequests    int    `json:"pull_requests"`  // 最近时间段内的 PR 数量
 	Rank            int    `json:"rank"`
 	URL             string `json:"url"`
 	HTMLURL         string `json:"html_url"` // GitHub API uses html_url
@@ -40,6 +44,34 @@ type Repository struct {
 // TrendingResponse API响应 (OSSInsight format)
 type TrendingResponse struct {
 	Data []Repository `json:"data"`
+}
+
+// OSSInsightSQLResponse OSSInsight SQL endpoint 响应格式
+type OSSInsightSQLResponse struct {
+	Type string `json:"type"`
+	Data struct {
+		Columns []struct {
+			Col      string `json:"col"`
+			DataType string `json:"data_type"`
+			Nullable bool   `json:"nullable"`
+		} `json:"columns"`
+		Rows []OSSInsightRow `json:"rows"`
+	} `json:"data"`
+}
+
+// OSSInsightRow OSSInsight trending repos 数据行
+type OSSInsightRow struct {
+	RepoID            string `json:"repo_id"`
+	RepoName          string `json:"repo_name"`
+	PrimaryLanguage   string `json:"primary_language"`
+	Description       string `json:"description"`
+	Stars             string `json:"stars"`
+	Forks             string `json:"forks"`
+	PullRequests      string `json:"pull_requests"`
+	Pushes            string `json:"pushes"`
+	TotalScore        string `json:"total_score"`
+	ContributorLogins string `json:"contributor_logins"`
+	CollectionNames   string `json:"collection_names"`
 }
 
 // GitHubSearchResponse GitHub Search API响应
@@ -113,7 +145,53 @@ func (c *Client) GetTrendingRepos(ctx context.Context, language string, period s
 		return nil, fmt.Errorf("failed to read response: %w", err)
 	}
 
-	// 尝试解析 GitHub Search API 响应
+	// 优先尝试解析 OSSInsight SQL endpoint 响应
+	var ossResult OSSInsightSQLResponse
+	if err := json.Unmarshal(body, &ossResult); err == nil && ossResult.Type == "sql_endpoint" && len(ossResult.Data.Rows) > 0 {
+		// 转换 OSSInsight SQL 格式到统一格式
+		repos := make([]Repository, 0, len(ossResult.Data.Rows))
+		for i, row := range ossResult.Data.Rows {
+			// 解析字符串到整数
+			repoID, _ := strconv.ParseInt(row.RepoID, 10, 64)
+			stars, _ := strconv.Atoi(row.Stars)
+			forks, _ := strconv.Atoi(row.Forks)
+			pushes, _ := strconv.Atoi(row.Pushes)
+			pullRequests, _ := strconv.Atoi(row.PullRequests)
+
+			// 提取 owner (repo_name 格式为 "owner/repo")
+			owner := ""
+			if idx := strings.Index(row.RepoName, "/"); idx > 0 {
+				owner = row.RepoName[:idx]
+			}
+
+			repo := Repository{
+				RepoID:          repoID,
+				RepoName:        row.RepoName,
+				FullName:        row.RepoName,
+				Description:     row.Description,
+				Language:        row.PrimaryLanguage,
+				Stars:           stars,
+				StargazersCount: stars,
+				Forks:           forks,
+				ForksCount:      forks,
+				Pushes:          pushes,
+				PullRequests:    pullRequests,
+				Rank:            i + 1,
+				URL:             fmt.Sprintf("https://github.com/%s", row.RepoName),
+				HTMLURL:         fmt.Sprintf("https://github.com/%s", row.RepoName),
+				Owner:           owner,
+			}
+			repos = append(repos, repo)
+
+			// 如果达到 limit，停止添加
+			if limit > 0 && len(repos) >= limit {
+				break
+			}
+		}
+		return repos, nil
+	}
+
+	// 尝试解析 GitHub Search API 响应（备用）
 	var ghResult GitHubSearchResponse
 	if err := json.Unmarshal(body, &ghResult); err == nil && len(ghResult.Items) > 0 {
 		// 转换 GitHub 格式到统一格式
@@ -139,7 +217,7 @@ func (c *Client) GetTrendingRepos(ctx context.Context, language string, period s
 		return repos, nil
 	}
 
-	// 尝试解析 OSSInsight 格式
+	// 尝试解析旧版 OSSInsight 格式（备用）
 	var result TrendingResponse
 	if err := json.Unmarshal(body, &result); err != nil {
 		return nil, fmt.Errorf("failed to parse response: %w", err)
@@ -179,47 +257,73 @@ func (c *Client) GetTrendingRepos(ctx context.Context, language string, period s
 
 // buildTrendingURL 构建trending API URL
 func (c *Client) buildTrendingURL(language string, period string, limit int) (string, error) {
-	// 由于 OSSInsight API trending端点需要预缓存且不稳定
-	// 我们使用 GitHub Search API 来模拟 trending 功能
-	// 通过搜索最近pushed且star数高的仓库来获取trending repos
-
-	// 计算日期范围 - 使用 pushed 而不是 created，获取最近活跃的项目
-	var pushedAfter string
-	switch period {
-	case "daily", "past_day":
-		pushedAfter = time.Now().AddDate(0, 0, -1).Format("2006-01-02")
-	case "weekly", "past_7_days":
-		pushedAfter = time.Now().AddDate(0, 0, -7).Format("2006-01-02")
-	case "monthly", "past_month", "past_28_days":
-		pushedAfter = time.Now().AddDate(0, -1, 0).Format("2006-01-02")
-	default:
-		pushedAfter = time.Now().AddDate(0, 0, -7).Format("2006-01-02")
-	}
-
-	// 构建GitHub Search API URL
-	// 搜索最近更新且stars数量较多的仓库
-	endpoint := "https://api.github.com/search/repositories"
+	// 使用 OSSInsight Trending API 获取真正的 trending 仓库
+	// 该 API 返回指定时间段内 star 增长最快的项目
+	endpoint := "https://api.ossinsight.io/v1/trends/repos/"
 
 	u, err := url.Parse(endpoint)
 	if err != nil {
 		return "", err
 	}
 
-	// 构建查询字符串 - 搜索星标数大于50且最近有推送的仓库
-	query := fmt.Sprintf("stars:>50 pushed:>%s", pushedAfter)
-	if language != "" && language != "all" {
-		query += fmt.Sprintf(" language:%s", language)
+	// 映射 period 参数到 OSSInsight API 格式
+	var ossinsightPeriod string
+	switch period {
+	case "daily", "past_day", "past_24_hours":
+		ossinsightPeriod = "past_24_hours"
+	case "weekly", "past_7_days", "past_week":
+		ossinsightPeriod = "past_week"
+	case "monthly", "past_month", "past_28_days":
+		ossinsightPeriod = "past_month"
+	case "past_3_months":
+		ossinsightPeriod = "past_3_months"
+	default:
+		ossinsightPeriod = "past_week" // 默认一周
+	}
+
+	// 映射 language 参数 - OSSInsight 使用首字母大写
+	var ossinsightLanguage string
+	if language == "" || language == "all" {
+		ossinsightLanguage = "All"
+	} else {
+		// 将首字母大写（如 "go" -> "Go", "javascript" -> "JavaScript"）
+		ossinsightLanguage = strings.ToUpper(language[:1]) + strings.ToLower(language[1:])
+		// 特殊处理常见语言名称
+		switch strings.ToLower(language) {
+		case "javascript":
+			ossinsightLanguage = "JavaScript"
+		case "typescript":
+			ossinsightLanguage = "TypeScript"
+		case "c++":
+			ossinsightLanguage = "C++"
+		case "c#":
+			ossinsightLanguage = "C#"
+		case "php":
+			ossinsightLanguage = "PHP"
+		case "html":
+			ossinsightLanguage = "HTML"
+		case "css":
+			ossinsightLanguage = "CSS"
+		case "plpgsql":
+			ossinsightLanguage = "PLpgSQL"
+		case "tsql":
+			ossinsightLanguage = "TSQL"
+		case "hcl":
+			ossinsightLanguage = "HCL"
+		case "cmake":
+			ossinsightLanguage = "CMake"
+		case "powershell":
+			ossinsightLanguage = "PowerShell"
+		case "matlab":
+			ossinsightLanguage = "MATLAB"
+		case "objective-c":
+			ossinsightLanguage = "Objective-C"
+		}
 	}
 
 	q := u.Query()
-	q.Set("q", query)
-	q.Set("sort", "stars")
-	q.Set("order", "desc")
-	if limit > 0 && limit <= 100 {
-		q.Set("per_page", fmt.Sprintf("%d", limit))
-	} else {
-		q.Set("per_page", "30")
-	}
+	q.Set("period", ossinsightPeriod)
+	q.Set("language", ossinsightLanguage)
 	u.RawQuery = q.Encode()
 
 	return u.String(), nil

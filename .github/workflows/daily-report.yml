@@ -51,11 +51,11 @@ jobs:
           EMAIL_USE_HTML: "true"
 
           # API配置
-          API_BASE_URL: "https://api.github.com"
+          API_BASE_URL: "https://api.ossinsight.io"
           API_TIMEOUT: "30"
 
           # 查询配置
-          QUERY_LANGUAGE: ${{ github.event.inputs.language || 'go' }}
+          QUERY_LANGUAGE: ${{ github.event.inputs.language || 'All' }}
           QUERY_PERIOD: ${{ github.event.inputs.period || 'daily' }}
           QUERY_LIMIT: "100"
         run: |

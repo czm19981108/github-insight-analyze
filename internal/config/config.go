@@ -47,7 +47,7 @@ type QueryConfig struct {
 func Load(configPath string) (*Config, error) {
 	config := &Config{
 		API: APIConfig{
-			BaseURL: "https://api.github.com",
+			BaseURL: "https://api.ossinsight.io",
 			Timeout: 30,
 		},
 		Query: QueryConfig{

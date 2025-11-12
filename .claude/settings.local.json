@@ -43,7 +43,15 @@
       "Bash(xargs -I {} basename {} .jsonl)",
       "Bash(find /c/Users/16547/.claude/projects -name \"*.jsonl\" ! -name \"agent-*\" -type f -exec sh -c 'echo \"\"Session: $(basename {} .jsonl)\"\"; echo \"\"Project: $(basename $(dirname {}))\"\"; echo \"\"Path: {}\"\"; stat -c \"\"Modified: %y\"\" {} 2>/dev/null || stat -f \"\"Modified: %Sm\"\" {} 2>/dev/null; echo \"\"---\"\"' ;)",
       "Bash(test -f configs/config.yaml)",
-      "Bash(cat configs/config.yaml)"
+      "Bash(cat configs/config.yaml)",
+      "Bash(curl -s \"https://api.github.com/search/repositories?q=created:>2025-01-05+language:go&sort=stars&order=desc&per_page=5\")",
+      "Bash(python -c \"import sys, json; d=json.load(sys.stdin); print(f''''Total: {d.get(\"\"total_count\"\", 0)}''''); [print(f''''{i[\"\"full_name\"\"]} - {i[\"\"stargazers_count\"\"]} stars (created: {i[\"\"created_at\"\"][:10]})'''') for i in d.get(''''items'''', [])[:5]]\")",
+      "Bash(curl -s \"https://api.ossinsight.io/v1/repos/trending?language=go&period=past_7_days\")",
+      "Bash(python -c \"import sys, json; data=json.load(sys.stdin); print(json.dumps(data, indent=2)[:2000])\")",
+      "Bash(./bin/notifier.exe)",
+      "Bash(curl -L -X GET 'https://api.ossinsight.io/v1/trends/repos/?period=past_week&language=Go' -H 'Accept: application/json')",
+      "Bash(curl -L -X GET \"https://api.ossinsight.io/v1/trends/repos/?period=past_week&language=Go\" -H 'Accept: application/json')",
+      "Bash(python -c \"import sys, json; data=json.load(sys.stdin); print(json.dumps(data, indent=2)[:5000])\")"
     ],
     "deny": [],
     "ask": []

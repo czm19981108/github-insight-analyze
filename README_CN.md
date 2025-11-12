@@ -82,7 +82,7 @@ cp configs/config.example.yaml configs/config.yaml
 2. 编辑 `configs/config.yaml`：
 ```yaml
 api:
-  base_url: "https://api.github.com"
+  base_url: "https://api.ossinsight.io"
   timeout: 30
 
 email:
@@ -118,7 +118,7 @@ export EMAIL_SUBJECT="GitHub 热门趋势报告"
 export EMAIL_USE_HTML="true"
 
 # API 配置
-export API_BASE_URL="https://api.github.com"
+export API_BASE_URL="https://api.ossinsight.io"
 export API_TIMEOUT="30"
 
 # 查询配置
@@ -202,7 +202,7 @@ export QUERY_LIMIT="100"
 
 本项目使用 GitHub Search API 获取热门仓库。
 
-**接口地址**：`https://api.github.com/search/repositories`
+**接口地址**：`https://api.ossinsight.io/search/repositories`
 
 **查询参数**：
 - `q`：搜索查询（例如：`stars:>50 pushed:>2025-01-11 language:go`）
