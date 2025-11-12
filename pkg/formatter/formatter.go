@@ -5,7 +5,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ossinsight-analyze/trending-notifier/pkg/api"
+	"github.com/github-insight-analyze/trending-notifier/pkg/api"
 )
 
 // Formatter 数据格式化器
@@ -67,7 +67,7 @@ func (f *TextFormatter) Format(repos []api.Repository, language string, period s
 
 	// 页脚
 	sb.WriteString("--------------------------------------\n")
-	sb.WriteString("Powered by OSS Insight API\n")
+	sb.WriteString("Powered by GitHub API\n")
 
 	return sb.String(), nil
 }
@@ -280,7 +280,7 @@ func (f *HTMLFormatter) Format(repos []api.Repository, language string, period s
         </table>
 
         <div class="footer">
-            <p>Powered by <a href="https://ossinsight.io" target="_blank">OSS Insight API</a></p>
+            <p>Powered by <a href="https://api.github.com" target="_blank">GitHub API</a></p>
         </div>
     </div>
 </body>

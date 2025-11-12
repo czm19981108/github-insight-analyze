@@ -1,10 +1,10 @@
-# OSS Insight 热门趋势通知器
+# GitHub 热门趋势通知器
 
-一个基于 Go 语言开发的应用程序，用于从 OSS Insight API 获取 GitHub 热门仓库并发送自动化邮件报告。帮助你及时了解你喜欢的编程语言的最新热门项目。
+一个基于 Go 语言开发的应用程序，用于从 GitHub API 获取热门仓库并发送自动化邮件报告。帮助你及时了解你喜欢的编程语言的最新热门项目。
 
 ## 功能特性
 
-- 从 OSS Insight API 获取热门仓库
+- 从 GitHub API 获取热门仓库
 - 支持编程语言过滤（Go、Java、Python、JavaScript 等）
 - 多个时间周期（每日、每周、每月）
 - 精美的 HTML 邮件模板
@@ -20,7 +20,7 @@
 ├── cmd/
 │   └── notifier/          # 主程序入口
 ├── pkg/
-│   ├── api/               # OSS Insight API 客户端
+│   ├── api/               # GitHub API 客户端
 │   ├── email/             # 邮件发送功能
 │   └── formatter/         # 数据格式化（文本和 HTML）
 ├── internal/
@@ -54,8 +54,8 @@ go version
 ### 2. 克隆仓库
 
 ```bash
-git clone https://github.com/yourusername/ossinsight-analyze.git
-cd ossinsight-analyze
+git clone https://github.com/yourusername/github-insight-analyze.git
+cd github-insight-analyze
 ```
 
 ### 3. 安装依赖
@@ -82,7 +82,7 @@ cp configs/config.example.yaml configs/config.yaml
 2. 编辑 `configs/config.yaml`：
 ```yaml
 api:
-  base_url: "https://api.ossinsight.io"
+  base_url: "https://api.github.com"
   timeout: 30
 
 email:
@@ -118,7 +118,7 @@ export EMAIL_SUBJECT="GitHub 热门趋势报告"
 export EMAIL_USE_HTML="true"
 
 # API 配置
-export API_BASE_URL="https://api.ossinsight.io"
+export API_BASE_URL="https://api.github.com"
 export API_TIMEOUT="30"
 
 # 查询配置
@@ -198,16 +198,19 @@ export QUERY_LIMIT="100"
 
 ## API 参考
 
-### OSS Insight API
+### GitHub API
 
-本项目使用 OSS Insight API 获取热门仓库。
+本项目使用 GitHub Search API 获取热门仓库。
 
-**接口地址**：`https://api.ossinsight.io/v1/repos/trending`
+**接口地址**：`https://api.github.com/search/repositories`
 
 **查询参数**：
-- `language`：编程语言过滤器
-- `period`：时间周期（daily、weekly、monthly）
-- `limit`：结果数量（1-100）
+- `q`：搜索查询（例如：`stars:>50 pushed:>2025-01-11 language:go`）
+- `sort`：排序方式（stars）
+- `order`：排序顺序（desc）
+- `per_page`：结果数量（1-100）
+
+**注意**：GitHub API 对未认证请求有速率限制（60次/小时）。如需更高限制，请考虑添加认证。
 
 ## 故障排查
 
@@ -242,7 +245,7 @@ go test ./...
 ### 代码结构
 
 - `cmd/notifier/main.go`：应用程序入口
-- `pkg/api/client.go`：OSS Insight API 客户端实现
+- `pkg/api/client.go`：GitHub API 客户端实现
 - `pkg/email/client.go`：邮件发送功能
 - `pkg/formatter/formatter.go`：数据格式化（文本和 HTML）
 - `internal/config/config.go`：配置管理
@@ -273,7 +276,7 @@ MIT License
 如果遇到任何问题或有疑问：
 
 1. 查看[故障排查](#故障排查)部分
-2. 搜索现有的 [GitHub Issues](https://github.com/yourusername/ossinsight-analyze/issues)
+2. 搜索现有的 [GitHub Issues](https://github.com/yourusername/github-insight-analyze/issues)
 3. 创建新的 issue 并提供详细信息
 
 ## 路线图
@@ -285,114 +288,6 @@ MIT License
 - [ ] 基于用户兴趣的仓库推荐
 - [ ] 每周/每月摘要汇总
 
----
-
-## 将本地项目关联到 GitHub 远程仓库
-
-如果你是第一次将本地项目推送到 GitHub，请按照以下步骤操作：
-
-### 步骤 1：在 GitHub 创建新仓库
-
-1. 登录 [GitHub](https://github.com)
-2. 点击右上角的 `+` 按钮，选择 "New repository"
-3. 填写仓库名称（如 `ossinsight-analyze`）
-4. 选择仓库类型（公开或私有）
-5. **不要**勾选"Initialize this repository with a README"（因为本地已有文件）
-6. 点击"Create repository"
-
-### 步骤 2：初始化本地 Git 仓库
-
-在项目根目录下打开命令行，执行以下命令：
-
-```bash
-# 初始化 Git 仓库
-git init
-
-# 添加所有文件到暂存区
-git add .
-
-# 创建第一次提交
-git commit -m "Initial commit: OSS Insight Trending Notifier"
-```
-
-### 步骤 3：关联远程仓库
-
-将本地仓库与 GitHub 远程仓库关联（将 `yourusername` 替换为你的 GitHub 用户名）：
-
-```bash
-# 添加远程仓库
-git remote add origin https://github.com/yourusername/ossinsight-analyze.git
-
-# 验证远程仓库是否添加成功
-git remote -v
-```
-
-### 步骤 4：推送代码到 GitHub
-
-```bash
-# 将本地代码推送到 GitHub（首次推送）
-git push -u origin main
-```
-
-**注意**：如果你的默认分支是 `master` 而非 `main`，请将上述命令中的 `main` 替换为 `master`，或者使用以下命令重命名分支：
-
-```bash
-# 重命名当前分支为 main
-git branch -M main
-
-# 然后推送
-git push -u origin main
-```
-
-### 步骤 5：验证推送成功
-
-1. 在浏览器中访问你的 GitHub 仓库页面
-2. 确认所有文件都已成功上传
-3. 检查 README.md 是否正确显示
-
-### 后续推送
-
-完成首次推送后，后续的代码更新只需执行：
-
-```bash
-# 添加修改的文件
-git add .
-
-# 提交更改
-git commit -m "描述你的更改"
-
-# 推送到 GitHub
-git push
-```
-
-### 使用 SSH 方式（推荐）
-
-如果你配置了 SSH 密钥，可以使用 SSH 地址关联远程仓库：
-
-```bash
-# 使用 SSH 地址添加远程仓库
-git remote add origin git@github.com:yourusername/ossinsight-analyze.git
-
-# 推送代码
-git push -u origin main
-```
-
-SSH 方式的优点是无需每次输入用户名和密码。
-
-### 常见问题
-
-**Q: 推送时提示需要身份验证**
-A: GitHub 已不再支持密码验证，需要使用个人访问令牌（Personal Access Token）：
-1. 访问 GitHub Settings → Developer settings → Personal access tokens → Tokens (classic)
-2. 生成新令牌，勾选 `repo` 权限
-3. 推送时使用令牌作为密码
-
-**Q: 推送被拒绝（rejected）**
-A: 可能是远程仓库有本地没有的提交，先执行：
-```bash
-git pull origin main --rebase
-git push origin main
-```
 
 ---
 

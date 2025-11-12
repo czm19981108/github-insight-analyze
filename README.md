@@ -1,10 +1,10 @@
-# OSS Insight Trending Notifier
+# GitHub Trending Notifier
 
-A Go-based application that fetches GitHub trending repositories from OSS Insight API and sends automated email reports. Perfect for staying updated with the latest trending projects in your favorite programming languages.
+A Go-based application that fetches GitHub trending repositories and sends automated email reports. Perfect for staying updated with the latest trending projects in your favorite programming languages.
 
 ## Features
 
-- Fetch trending repositories from OSS Insight API
+- Fetch trending repositories from GitHub API
 - Support for language filtering (Go, Java, Python, JavaScript, etc.)
 - Multiple time periods (daily, weekly, monthly)
 - Beautiful HTML email templates
@@ -20,7 +20,7 @@ A Go-based application that fetches GitHub trending repositories from OSS Insigh
 ├── cmd/
 │   └── notifier/          # Main application entry point
 ├── pkg/
-│   ├── api/               # OSS Insight API client
+│   ├── api/               # GitHub API client
 │   ├── email/             # Email sending functionality
 │   └── formatter/         # Data formatting (text & HTML)
 ├── internal/
@@ -54,8 +54,8 @@ go version
 ### 2. Clone Repository
 
 ```bash
-git clone https://github.com/yourusername/ossinsight-analyze.git
-cd ossinsight-analyze
+git clone https://github.com/yourusername/github-insight-analyze.git
+cd github-insight-analyze
 ```
 
 ### 3. Install Dependencies
@@ -82,7 +82,7 @@ cp configs/config.example.yaml configs/config.yaml
 2. Edit `configs/config.yaml`:
 ```yaml
 api:
-  base_url: "https://api.ossinsight.io"
+  base_url: "https://api.github.com"
   timeout: 30
 
 email:
@@ -118,7 +118,7 @@ export EMAIL_SUBJECT="GitHub Trending Report"
 export EMAIL_USE_HTML="true"
 
 # API Configuration
-export API_BASE_URL="https://api.ossinsight.io"
+export API_BASE_URL="https://api.github.com"
 export API_TIMEOUT="30"
 
 # Query Configuration
@@ -198,16 +198,19 @@ The workflow is already configured in `.github/workflows/daily-report.yml`
 
 ## API Reference
 
-### OSS Insight API
+### GitHub API
 
-This project uses the OSS Insight API to fetch trending repositories.
+This project uses the GitHub Search API to fetch trending repositories.
 
-**Endpoint**: `https://api.ossinsight.io/v1/repos/trending`
+**Endpoint**: `https://api.github.com/search/repositories`
 
 **Query Parameters**:
-- `language`: Programming language filter
-- `period`: Time period (daily, weekly, monthly)
-- `limit`: Number of results (1-100)
+- `q`: Search query (e.g., `stars:>50 pushed:>2025-01-11 language:go`)
+- `sort`: Sort by (stars)
+- `order`: Sort order (desc)
+- `per_page`: Number of results (1-100)
+
+**Note**: GitHub API has a rate limit of 60 requests/hour for unauthenticated requests. For higher limits, consider adding authentication.
 
 ## Troubleshooting
 
@@ -221,7 +224,7 @@ This project uses the OSS Insight API to fetch trending repositories.
 ### API Errors
 
 1. **Timeout**: Increase `API_TIMEOUT` value
-2. **Rate limiting**: OSS Insight API may have rate limits
+2. **Rate limiting**: GitHub API has rate limits for unauthenticated requests
 3. **Network issues**: Check internet connectivity
 
 ### GitHub Actions Not Running
@@ -242,7 +245,7 @@ go test ./...
 ### Code Structure
 
 - `cmd/notifier/main.go`: Application entry point
-- `pkg/api/client.go`: OSS Insight API client implementation
+- `pkg/api/client.go`: GitHub API client implementation
 - `pkg/email/client.go`: Email sending functionality
 - `pkg/formatter/formatter.go`: Data formatting (text & HTML)
 - `internal/config/config.go`: Configuration management
@@ -265,7 +268,7 @@ MIT License
 
 ## Acknowledgments
 
-- [OSS Insight](https://ossinsight.io) for providing the trending repositories API
+- [GitHub](https://github.com) for providing the Search API
 - GitHub for hosting and Actions automation
 
 ## Support
@@ -273,7 +276,7 @@ MIT License
 If you encounter any issues or have questions:
 
 1. Check the [Troubleshooting](#troubleshooting) section
-2. Search existing [GitHub Issues](https://github.com/yourusername/ossinsight-analyze/issues)
+2. Search existing [GitHub Issues](https://github.com/yourusername/github-insight-analyze/issues)
 3. Create a new issue with detailed information
 
 ## Roadmap

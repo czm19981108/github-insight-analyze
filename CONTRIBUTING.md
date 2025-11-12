@@ -51,8 +51,8 @@ Enhancement suggestions are welcome! Please create an issue with:
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/yourusername/ossinsight-analyze.git
-cd ossinsight-analyze
+git clone https://github.com/yourusername/github-insight-analyze.git
+cd github-insight-analyze
 ```
 
 2. Install dependencies:

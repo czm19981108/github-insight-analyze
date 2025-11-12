@@ -2,10 +2,12 @@ package config
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"strconv"
 	"strings"
 
+	"github.com/joho/godotenv"
 	"gopkg.in/yaml.v3"
 )
 
@@ -16,7 +18,7 @@ type Config struct {
 	Query QueryConfig `yaml:"query"`
 }
 
-// APIConfig OSS Insight API配置
+// APIConfig GitHub API配置
 type APIConfig struct {
 	BaseURL string `yaml:"base_url"`
 	Timeout int    `yaml:"timeout"` // 超时时间（秒）
@@ -24,28 +26,28 @@ type APIConfig struct {
 
 // EmailConfig 邮件配置
 type EmailConfig struct {
-	SMTPHost     string   `yaml:"smtp_host"`
-	SMTPPort     int      `yaml:"smtp_port"`
-	Username     string   `yaml:"username"`
-	Password     string   `yaml:"password"`
-	From         string   `yaml:"from"`
-	To           []string `yaml:"to"`
-	Subject      string   `yaml:"subject"`
-	UseHTML      bool     `yaml:"use_html"`
+	SMTPHost string   `yaml:"smtp_host"`
+	SMTPPort int      `yaml:"smtp_port"`
+	Username string   `yaml:"username"`
+	Password string   `yaml:"password"`
+	From     string   `yaml:"from"`
+	To       []string `yaml:"to"`
+	Subject  string   `yaml:"subject"`
+	UseHTML  bool     `yaml:"use_html"`
 }
 
 // QueryConfig 查询参数配置
 type QueryConfig struct {
-	Language  string `yaml:"language"`   // 编程语言，如 "go", "java", "all"
-	Period    string `yaml:"period"`     // 时间范围，如 "daily", "weekly", "monthly"
-	Limit     int    `yaml:"limit"`      // 获取数量，默认100
+	Language string `yaml:"language"` // 编程语言，如 "go", "java", "all"
+	Period   string `yaml:"period"`   // 时间范围，如 "daily", "weekly", "monthly"
+	Limit    int    `yaml:"limit"`    // 获取数量，默认100
 }
 
 // Load 从配置文件加载配置
 func Load(configPath string) (*Config, error) {
 	config := &Config{
 		API: APIConfig{
-			BaseURL: "https://api.ossinsight.io",
+			BaseURL: "https://api.github.com",
 			Timeout: 30,
 		},
 		Query: QueryConfig{
@@ -90,6 +92,11 @@ func loadFromFile(path string, config *Config) error {
 
 // loadFromEnv 从环境变量加载配置
 func loadFromEnv(config *Config) {
+	// 加上一步支持从.env读取环境变量
+	// 如果不在这里手动加载.env文件会导致程序去读取系统环境变量
+	if err := godotenv.Load(); err != nil {
+		log.Println("警告: 未找到 .env 文件，将使用系统环境变量")
+	}
 	// API配置
 	if v := os.Getenv("API_BASE_URL"); v != "" {
 		config.API.BaseURL = v
@@ -102,6 +109,7 @@ func loadFromEnv(config *Config) {
 
 	// 邮件配置
 	if v := os.Getenv("SMTP_HOST"); v != "" {
+		log.Printf("本次读取的SMTP_HOST: %v", v)
 		config.Email.SMTPHost = v
 	}
 	if v := os.Getenv("SMTP_PORT"); v != "" {

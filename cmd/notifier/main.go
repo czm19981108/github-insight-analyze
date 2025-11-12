@@ -8,10 +8,10 @@ import (
 	"os"
 	"time"
 
-	"github.com/ossinsight-analyze/trending-notifier/internal/config"
-	"github.com/ossinsight-analyze/trending-notifier/pkg/api"
-	"github.com/ossinsight-analyze/trending-notifier/pkg/email"
-	"github.com/ossinsight-analyze/trending-notifier/pkg/formatter"
+	"github.com/github-insight-analyze/trending-notifier/internal/config"
+	"github.com/github-insight-analyze/trending-notifier/pkg/api"
+	"github.com/github-insight-analyze/trending-notifier/pkg/email"
+	"github.com/github-insight-analyze/trending-notifier/pkg/formatter"
 )
 
 var (
@@ -26,7 +26,7 @@ func main() {
 
 	// 显示版本信息
 	if *version {
-		fmt.Printf("OSS Insight Trending Notifier v%s\n", appVersion)
+		fmt.Printf("GitHub Trending Notifier v%s\n", appVersion)
 		os.Exit(0)
 	}
 

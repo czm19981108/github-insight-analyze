@@ -1,54 +1,54 @@
-# Quick Start Guide
+# 快速入门指南
 
-Get up and running with OSS Insight Trending Notifier in 5 minutes!
+只需 5 分钟即可启动和运行 OSS Insight 趋势通知器！
 
-## Prerequisites
+## 前置要求
 
-- Go 1.21+ installed ([Download](https://golang.org/dl/))
-- SMTP credentials (Gmail, Outlook, or any email service)
-- GitHub account (for automated execution)
+- 已安装 Go 1.21+ ([下载](https://golang.org/dl/))
+- SMTP 凭据（Gmail、Outlook 或任何邮件服务）
+- GitHub 账户（用于自动执行）
 
-## Step 1: Install Go
+## 步骤 1：安装 Go
 
-If Go is not installed, download and install it from [golang.org](https://golang.org/dl/)
+如果尚未安装 Go，请从 [golang.org](https://golang.org/dl/) 下载并安装
 
-Verify installation:
+验证安装：
 ```bash
 go version
 ```
 
-## Step 2: Clone and Build
+## 步骤 2：克隆和构建
 
 ```bash
-# Clone the repository
-git clone https://github.com/yourusername/ossinsight-analyze.git
-cd ossinsight-analyze
+# 克隆仓库
+git clone https://github.com/yourusername/github-insight-analyze.git
+cd github-insight-analyze
 
-# Download dependencies
+# 下载依赖
 go mod download
 
-# Build the application
+# 构建应用程序
 go build -o notifier ./cmd/notifier
 ```
 
-Or use Make:
+或使用 Make：
 ```bash
 make build
 ```
 
-## Step 3: Configure
+## 步骤 3：配置
 
-### Option A: Use Environment Variables (Recommended for testing)
+### 选项 A：使用环境变量（推荐用于测试）
 
 ```bash
-# Copy the example file
+# 复制示例文件
 cp .env.example .env
 
-# Edit .env with your settings
-nano .env  # or use your preferred editor
+# 编辑 .env 文件设置您的配置
+nano .env  # 或使用您喜欢的编辑器
 ```
 
-Required settings:
+必需的设置：
 ```bash
 SMTP_HOST="smtp.gmail.com"
 SMTP_PORT="587"
@@ -60,38 +60,38 @@ QUERY_LANGUAGE="go"
 QUERY_PERIOD="daily"
 ```
 
-### Option B: Use Configuration File
+### 选项 B：使用配置文件
 
 ```bash
-# Copy the example config
+# 复制示例配置
 cp configs/config.example.yaml configs/config.yaml
 
-# Edit the config file
+# 编辑配置文件
 nano configs/config.yaml
 ```
 
-## Step 4: Gmail Setup (if using Gmail)
+## 步骤 4：Gmail 设置（如果使用 Gmail）
 
-1. Go to [Google Account Security](https://myaccount.google.com/security)
-2. Enable **2-Step Verification**
-3. Go to [App Passwords](https://myaccount.google.com/apppasswords)
-4. Create a new app password for "Mail"
-5. Copy the password and use it in your configuration
+1. 访问 [Google 账户安全](https://myaccount.google.com/security)
+2. 启用 **两步验证**
+3. 访问 [应用专用密码](https://myaccount.google.com/apppasswords)
+4. 为"邮件"创建新的应用专用密码
+5. 复制密码并在配置中使用
 
-## Step 5: Test Run
+## 步骤 5：测试运行
 
 ```bash
-# Run with environment variables
+# 使用环境变量运行
 ./notifier
 
-# Or run with config file
+# 或使用配置文件运行
 ./notifier -config configs/config.yaml
 
-# Or use Make
+# 或使用 Make
 make run
 ```
 
-You should see output like:
+您应该会看到类似以下的输出：
 ```
 2025/01/07 10:30:00 Loading configuration...
 2025/01/07 10:30:00 Configuration loaded successfully
@@ -106,26 +106,26 @@ You should see output like:
 2025/01/07 10:30:05 Email sent successfully!
 ```
 
-## Step 6: Set Up GitHub Actions (Optional)
+## 步骤 6：设置 GitHub Actions（可选）
 
-For automated daily reports:
+用于自动生成每日报告：
 
-### 1. Push to GitHub
+### 1. 推送到 GitHub
 
 ```bash
 git init
 git add .
 git commit -m "Initial commit"
 git branch -M main
-git remote add origin https://github.com/yourusername/ossinsight-analyze.git
+git remote add origin https://github.com/yourusername/github-insight-analyze.git
 git push -u origin main
 ```
 
-### 2. Add Secrets
+### 2. 添加密钥
 
-Go to: **Repository → Settings → Secrets and variables → Actions**
+访问：**仓库 → Settings → Secrets and variables → Actions**
 
-Add these secrets:
+添加以下密钥：
 - `SMTP_HOST`: smtp.gmail.com
 - `SMTP_PORT`: 587
 - `SMTP_USERNAME`: your-email@gmail.com
@@ -133,89 +133,89 @@ Add these secrets:
 - `EMAIL_FROM`: your-email@gmail.com
 - `EMAIL_TO`: recipient@example.com
 
-### 3. Enable Actions
+### 3. 启用 Actions
 
-- Go to **Actions** tab
-- Enable workflows
-- The workflow will run daily at 07:30 Shanghai time
+- 访问 **Actions** 标签页
+- 启用工作流
+- 工作流将每天上海时间 07:30 运行
 
-### 4. Test Manually
+### 4. 手动测试
 
-- Go to **Actions** → **Daily Trending Report**
-- Click **Run workflow**
-- Select branch and parameters
-- Click **Run workflow**
+- 访问 **Actions** → **Daily Trending Report**
+- 点击 **Run workflow**
+- 选择分支和参数
+- 点击 **Run workflow**
 
-## Common Issues
+## 常见问题
 
-### Issue: Email not sending
+### 问题：邮件发送失败
 
-**Solution**: Check SMTP credentials and port. Gmail users must use App Password.
+**解决方案**：检查 SMTP 凭据和端口。Gmail 用户必须使用应用专用密码。
 
-### Issue: API timeout
+### 问题：API 超时
 
-**Solution**: Increase timeout in configuration:
+**解决方案**：在配置中增加超时时间：
 ```bash
 export API_TIMEOUT=60
 ```
 
-### Issue: Go command not found
+### 问题：找不到 Go 命令
 
-**Solution**: Install Go or add it to PATH:
+**解决方案**：安装 Go 或将其添加到 PATH：
 ```bash
 export PATH=$PATH:/usr/local/go/bin
 ```
 
-## Next Steps
+## 下一步
 
-- Customize email templates in `pkg/formatter/formatter.go`
-- Adjust schedule in `.github/workflows/daily-report.yml`
-- Add multiple recipients in configuration
-- Explore different languages and time periods
+- 在 `pkg/formatter/formatter.go` 中自定义邮件模板
+- 在 `.github/workflows/daily-report.yml` 中调整计划时间
+- 在配置中添加多个收件人
+- 探索不同的语言和时间段
 
-## Useful Commands
+## 常用命令
 
 ```bash
-# Build
+# 构建
 make build
 
-# Run
+# 运行
 make run
 
-# Run with config
+# 使用配置运行
 make run-config
 
-# Test
+# 测试
 make test
 
-# Clean build artifacts
+# 清理构建产物
 make clean
 
-# Format code
+# 格式化代码
 make fmt
 
-# Show all commands
+# 显示所有命令
 make help
 
-# Check version
+# 检查版本
 ./notifier -version
 ```
 
-## Support
+## 支持
 
-- Read the full [README.md](README.md)
-- Check [CONTRIBUTING.md](CONTRIBUTING.md) for development
-- Report issues on [GitHub](https://github.com/yourusername/ossinsight-analyze/issues)
+- 阅读完整的 [README.md](README.md)
+- 查看 [CONTRIBUTING.md](CONTRIBUTING.md) 了解开发信息
+- 在 [GitHub](https://github.com/yourusername/github-insight-analyze/issues) 上报告问题
 
-## Example Output
+## 示例输出
 
-You'll receive an email with a beautiful HTML report showing:
+您将收到一封包含精美 HTML 报告的邮件，显示：
 
-- Top 100 trending repositories
-- Repository descriptions
-- Star counts and growth
-- Fork counts
-- Programming languages
-- Direct links to repositories
+- 前 100 个热门仓库
+- 仓库描述
+- 星标数和增长情况
+- Fork 数
+- 编程语言
+- 仓库直接链接
 
-Happy trending! 🚀
+祝您使用愉快！🚀
