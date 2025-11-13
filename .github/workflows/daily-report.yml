@@ -47,7 +47,7 @@ jobs:
           SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
           EMAIL_FROM: ${{ secrets.EMAIL_FROM }}
           EMAIL_TO: ${{ secrets.EMAIL_TO }}
-          EMAIL_SUBJECT: "GitHub Trending Repositories Report - ${{ github.event.inputs.language || 'go' }}"
+          EMAIL_SUBJECT: "GitHub Trending Repositories Report - ${{ github.event.inputs.language || 'All' }}"
           EMAIL_USE_HTML: "true"
 
           # API配置
